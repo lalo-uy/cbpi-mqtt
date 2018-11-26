@@ -132,7 +132,7 @@ def initMQTT(app):
 def actor_supervisor_background_task(a):
 
     for key, value in cbpi.cache.get("actors").iteritems():
-        print key, "   ", value.name
+#        print key, "   ", value.name
         if value.type == "MQTTActor":
 		if value.state == 0 :
 			cbpi.cache["mqtt"].client.publish(value.config['topic'], payload="off", qos=2, retain=True)	
