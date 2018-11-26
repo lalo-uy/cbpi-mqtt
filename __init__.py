@@ -32,10 +32,10 @@ class MQTTThread (threading.Thread):
 class MQTTActor(ActorBase):
     topic = Property.Text("Topic", configurable=True, default_value="", description="MQTT TOPIC")
     def on(self, power=100):
-        self.api.cache["mqtt"].client.publish(self.topic, payload=json.dumps({"state": "on"}), qos=2, retain=True)
+        self.api.cache["mqtt"].client.publish(self.topic, payload="on", qos=2, retain=True)
 
     def off(self):
-        self.api.cache["mqtt"].client.publish(self.topic, payload=json.dumps({"state": "off"}), qos=2, retain=True)
+        self.api.cache["mqtt"].client.publish(self.topic, payload="off", qos=2, retain=True)
 
 
 @cbpi.sensor
@@ -128,4 +128,11 @@ def initMQTT(app):
 
     cbpi.socketio.start_background_task(target=mqtt_reader, api=app)
 
+@cbpi.backgroundtask(key="Actor_Supervisor", interval=60)
+def actor_supervisor_background_task(a):
 
+    for key, value in cbpi.cache.get("actor").iteritems():
+        #print key, "   ", value.name
+        if hasattr(value, 'instance'):
+            print key, "   ", value.name
+            
