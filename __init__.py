@@ -43,7 +43,8 @@ class MQTT_SENSOR(SensorActive):
     a_topic = Property.Text("Topic", configurable=True, default_value="", description="MQTT TOPIC")
     b_payload = Property.Text("Payload Dictioanry", configurable=True, default_value="", description="Where to find msg in patload, leave blank for raw payload")
     c_unit = Property.Text("Unit", configurable=True, default_value="", description="Units to display")
-
+    offset = Property.Number("Offset", True, 0, description="Offset which is added to the received sensor data. Positive and negative values are both allowed.")
+    
     last_value = None
     def init(self):
         self.topic = self.a_topic
@@ -75,7 +76,7 @@ class MQTT_SENSOR(SensorActive):
 
 
     def get_value(self):
-        return {"value": self.last_value, "unit": self.unit}
+        return {"value": self.last_value+self.offset, "unit": self.unit}
 
     def get_unit(self):
         return self.unit
@@ -127,15 +128,4 @@ def initMQTT(app):
                 pass
 
     cbpi.socketio.start_background_task(target=mqtt_reader, api=app)
-
-@cbpi.backgroundtask(key="Actor_Supervisor", interval=60)
-def actor_supervisor_background_task(a):
-
-    for key, value in cbpi.cache.get("actors").iteritems():
-#        print key, "   ", value.name
-        if value.type == "MQTTActor":
-		if value.state == 0 :
-			cbpi.cache["mqtt"].client.publish(value.config['topic'], payload="off", qos=2, retain=True)	
-		else:
-			cbpi.cache["mqtt"].client.publish(value.config['topic'], payload="on", qos=2, retain=True)	
 
